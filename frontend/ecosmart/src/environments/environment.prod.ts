@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBase: 'https://YOUR_RENDER_APP.onrender.com/api',
+  apiBase: 'https://ecosmart-home.onrender.com/api',
 };
