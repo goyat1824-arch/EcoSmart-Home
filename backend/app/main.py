@@ -1,10 +1,13 @@
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.database import create_tables
+from app.database import create_tables, SessionLocal
 from app.routers import users, households, appliances, energy, predictions, analytics, recommendations
 
+logger = logging.getLogger(__name__)
 settings = get_settings()
 
 app = FastAPI(
@@ -21,10 +24,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Create database tables on startup
+
+# Create database tables on startup and optionally seed
 @app.on_event("startup")
 def on_startup():
     create_tables()
+    if settings.AUTO_SEED:
+        from app.models.energy_reading import EnergyReading
+        db = SessionLocal()
+        try:
+            if db.query(EnergyReading).count() == 0:
+                logger.info("AUTO_SEED enabled and DB is empty — seeding data...")
+                db.close()
+                from seed_data import seed_database
+                seed_database()
+            else:
+                logger.info("Database already has data, skipping seed.")
+        except Exception as e:
+            logger.error(f"Auto-seed failed: {e}")
+        finally:
+            db.close()
 
 # Include routers
 app.include_router(users.router, prefix="/api/users", tags=["Users"])

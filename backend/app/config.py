@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     APP_VERSION: str = "1.0.0"
     DATABASE_URL: str = "sqlite:///./ecosmart.db"
     CORS_ORIGINS: list[str] = ["http://localhost:4200"]
+    AUTO_SEED: bool = False
 
     # Default emission factors (kg CO2 per kWh)
     DEFAULT_EMISSION_FACTOR: float = 0.055  # France average
